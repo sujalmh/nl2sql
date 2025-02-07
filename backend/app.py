@@ -11,16 +11,22 @@ from langchain_core.runnables import RunnablePassthrough
 import ast
 from typing import TypedDict, List, Optional
 from sqlalchemy import text
+from langchain_google_genai import ChatGoogleGenerativeAI
+from dotenv import load_dotenv
+import os
+load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['ALLOWED_EXTENSIONS'] = {'db'}
-HISTORY_WINDOW_SIZE = 3
+HISTORY_WINDOW_SIZE = 10
 
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
+# llm = ChatGoogleGenerativeAI(model="models/gemini-2.0-flash-lite-preview-02-05", google_api_key=os.getenv("GOOGLE_API_KEY"), temperature=0)
 llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
+
 db = None  
 
 class QueryState(TypedDict):
@@ -40,12 +46,25 @@ SELECT * FROM `data` WHERE `Year` = 2024 AND `Month` IN ('October', 'November', 
     {
         "input": "inflation summary for year 2024 by months",
         "answer": """
-SELECT `Month`, SUM(`Inflation (%)`) AS `Total Inflation (%)`
+SELECT `Month`, AVG(`Inflation (%)`) AS `Total Inflation (%)`
 FROM `data`
 WHERE `Year` = 2024
 GROUP BY `Month`
-ORDER BY `Month`
-LIMIT 5;
+ORDER BY 
+    CASE 
+        WHEN `Month` = 'January' THEN 1
+        WHEN `Month` = 'February' THEN 2
+        WHEN `Month` = 'March' THEN 3
+        WHEN `Month` = 'April' THEN 4
+        WHEN `Month` = 'May' THEN 5
+        WHEN `Month` = 'June' THEN 6
+        WHEN `Month` = 'July' THEN 7
+        WHEN `Month` = 'August' THEN 8
+        WHEN `Month` = 'September' THEN 9
+        WHEN `Month` = 'October' THEN 10
+        WHEN `Month` = 'November' THEN 11
+        WHEN `Month` = 'December' THEN 12
+    END
 """
     },
     {
@@ -66,6 +85,68 @@ AND `State` IN ('Andhra Pradesh', 'Tamil Nadu', 'Uttar Pradesh')
 LIMIT 5;
 """
     },
+     {
+        "input": "compare sector-wise inflation",
+        "answer": """
+SELECT
+    `Year`,
+    AVG(CASE WHEN Sector = 'Rural' THEN `Inflation (%)` END) AS `Rural Inflation (%)`,
+    AVG(CASE WHEN Sector = 'Urban' THEN `Inflation (%)` END) AS `Urban Inflation (%)`,
+    AVG(CASE WHEN Sector = 'Combined' THEN `Inflation (%)` END) AS `Combined Inflation (%)`
+FROM `data`
+WHERE Sector IN ('rural', 'urban')
+GROUP BY `Year`
+ORDER BY `Year`
+"""
+    },
+    {
+        "input": "compare food and fuel inflation in combined sector",
+        "answer": """
+SELECT
+    `Year`,
+    AVG(CASE WHEN `Group` = 'Food and Beverages' THEN `Inflation (%)` END) AS `Food Inflation (%)`,
+    AVG(CASE WHEN `Group` = 'Fuel and Light' THEN `Inflation (%)` END) AS `Fuel Inflation (%)`
+FROM `data`
+WHERE Sector = 'combined' AND `Group` IN ('Food and Beverages', 'Fuel and Light')
+GROUP BY `Year`
+ORDER BY `Year`
+"""
+    },
+    {
+        "input": "show inflation rate trends in 2024",
+        "answer": """
+SELECT `Month`, AVG(`Inflation (%)`) AS `Avg_Inflation`
+FROM `data`
+WHERE `Year` = 2024
+GROUP BY `Month`
+ORDER BY 
+    CASE 
+        WHEN `Month` = 'January' THEN 1
+        WHEN `Month` = 'February' THEN 2
+        WHEN `Month` = 'March' THEN 3
+        WHEN `Month` = 'April' THEN 4
+        WHEN `Month` = 'May' THEN 5
+        WHEN `Month` = 'June' THEN 6
+        WHEN `Month` = 'July' THEN 7
+        WHEN `Month` = 'August' THEN 8
+        WHEN `Month` = 'September' THEN 9
+        WHEN `Month` = 'October' THEN 10
+        WHEN `Month` = 'November' THEN 11
+        WHEN `Month` = 'December' THEN 12
+    END
+"""
+    },{
+        "input": "what factors are affecting inflation rate of Karnataka in 2024",
+        "answer": """
+SELECT `SubGroup`, AVG(`Inflation (%)`) AS `Avg_Inflation`
+FROM `data`
+WHERE `Year` = 2024 
+  AND `State` = 'Karnataka'
+GROUP BY `SubGroup`,
+ORDER BY `Avg_Inflation` DESC
+LIMIT 5;
+"""
+    },
 ]
 
 example_prompt = PromptTemplate(
@@ -77,15 +158,23 @@ PROMPT = FewShotPromptTemplate(
     examples=examples,
     example_prompt=example_prompt,
     prefix=""" 
-You are a SQL expert analyzing economic data. Use this conversation history to understand context:
+You are a SQL expert analyzing economic data, helping normal users use NL to query data. Use this conversation history to understand context:
 
 {history}
 
+When the question is vague or requires summarization:
+- Identify and select only the columns relevant to the question.
+- Use appropriate aggregations (e.g., SUM, AVG, COUNT) or grouping when the question asks for trends or summaries.
+- If the question asks about trends over time (e.g., monthly, quarterly), group by the `Month` column.
+- If the question asks about factors affecting inflation or trends, consider aggregating on `Inflation (%)` and selecting columns such as `State`, `Sector`, or `Group` when relevant.
+
 Generate SQL queries for SQLite following these rules:
-1. Use only existing columns.
-2. Escape reserved keywords with backticks (`).
-3. Return only SQL without Markdown.
-4. Limit results to {top_k} per SELECT.
+1. Return single sql query per question.
+2. Return required columns relevant to the question. 
+2. Use only existing columns.
+3. Escape reserved keywords with backticks (`).
+4. Return only SQL without Markdown.
+5. Limit results to {top_k} per SELECT, or show full results only when relevant.
 
 Available tables: {table_info}
 
