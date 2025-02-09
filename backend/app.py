@@ -9,7 +9,7 @@ from langchain_core.prompts import FewShotPromptTemplate, PromptTemplate
 from langgraph.graph import StateGraph, END
 from langchain_core.runnables import RunnablePassthrough
 import ast
-from typing import TypedDict, List, Optional
+from typing import TypedDict, List, Optional, Dict
 from sqlalchemy import text
 from langchain_google_genai import ChatGoogleGenerativeAI
 from dotenv import load_dotenv
@@ -202,24 +202,31 @@ PROMPT = FewShotPromptTemplate(
     examples=examples,
     example_prompt=example_prompt,
     prefix="""
-You are a SQL expert analyzing economic data, helping normal users use NL to query data. Use this conversation history to understand context:
+You are an extremely precise SQL expert analyzing economic data in a conversation. Your goal is to generate only valid, executable SQL queries. You MUST follow these instructions exactly. Pay very close attention to the conversation history and to error messages to refine your queries.
+Use this conversation history to understand context:
 
 {history}
 
 When the question is vague or requires summarization:
 - Identify and select only the columns relevant to the question.
 - Use appropriate aggregations (e.g., SUM, AVG, COUNT) or grouping when the question asks for trends or summaries.
-- If the question asks about trends over time (e.g., monthly, quarterly), group by the Month column.
-- If the question asks about factors affecting inflation or trends, consider aggregating on Inflation (%) and selecting columns such as State, Sector, or Group when relevant.
+- If the question asks about trends over time (e.g., monthly, quarterly), group by the Month or Year column as appropriate.
+- If the question asks about factors affecting inflation or trends, consider aggregating on Inflation (%) and selecting relevant columns such as State, Sector, or Group.
+
+Handling Follow-up Questions:
+When you receive a new question, consider the conversation history to understand the user's evolving information needs.
+- Identify Semantic Context: Focus on the overall meaning and topic of the conversation, not just keywords.  Understand the user's underlying intent.
+- Recognize Question Type: Determine if the new question is a refinement, specification, or related question to the previous turns. Is it asking for similar information but with different parameters, or a completely new topic?
+- Maintain Semantic Consistency: If the current question is semantically related to the previous ones, try to maintain consistency in the query structure (e.g., columns, aggregations) while adjusting filters or groupings as needed. For very short follow-up questions (like single words or years),  infer the implied intent from the semantic context of the conversation.  **However, be cautious not to over-infer context if the new question introduces a significantly different topic or data requirement.**
+- Independent Questions: If the new question appears to be unrelated to the conversation history, generate a new SQL query from scratch, disregarding prior context.
 
 Generate SQL queries for SQLite following these rules:
 1. Return a single SQL query per question.
 2. Select necessary columns to support user question.
-3. Check previous questions in the conversation history to provide context.
+3. Check previous questions in the conversation history to provide context and maintain semantic consistency where appropriate.
 4. Use only existing columns from {table_info}.
-5. Escape reserved keywords with backticks ().
-6. Return only the SQL query without Markdown (dont wrap with
-sql).
+5. Escape reserved keywords with backticks (`).
+6. Return only the SQL query without Markdown (dont wrap with ```sql).
 7. Use `LIMIT {top_k}` when results need to be restricted.
 
 Available tables:
