@@ -1,0 +1,51 @@
+# Results
+
+## 1. 
+![inflation-trends](https://github.com/user-attachments/assets/8a4bffeb-0c84-4ab8-b5e8-0c834d2a8227)
+
+The context is carried throughout the question.
+---
+## 2.
+![compare-food-and-fuel-inflation-in-combined-sector](https://github.com/user-attachments/assets/a169d218-6267-447a-8fd0-9690396db3e0)
+
+When a user asks question without using the full entity name, the AI understands it and uses the full entity name to query. In the example, user asks compare food and fuel inflation in rural sector. The generated SQL uses groups `Food and Beverages` and `Fuel and Light` when not explicitly mentioned.
+---
+## 3.
+![show-inflation-rate-trends-in-2024](https://github.com/user-attachments/assets/948ddd80-b403-45e5-ab08-19f3daa3e2d6)
+
+In the example, user asks show inflation rate trends in 2024. The generated SQL query returns results with average inflation rate for every month, sorted calender-wise, for better comparison.
+---
+## 4.
+![what-factors-are-affecting-inflation-rate-of-maharashtra-in-2024](https://github.com/user-attachments/assets/b3cfeb75-347e-4a58-aeec-b5323254e840)
+
+The user asks what factors are affecting the inflation rate. The generated SQL query returns results with average inflation for each subgroup showing which subgroup is affecting the inflation rate most.
+---
+## 5. 
+![year-over-year-difference](https://github.com/user-attachments/assets/4d547650-4e32-4336-a82d-294e668ab6e3)
+
+The user asks for year-over-year difference in inflation rate for every state. The generated SQL is complex which takes average for each year and then subtracts with the year preceeding it. The SQL results are also formatted in a user-friendly way to help compare easily.
+---
+## 6.
+![volatility](https://github.com/user-attachments/assets/86686eae-a7ad-4e5a-9667-05046a51eafd)
+
+The user asks for most volatile inflation. The generated SQL uses standard deviation to compare the inflation rates between subgroups. This uses mathematical queries to get meaningful results.
+---
+## 7.
+![correlation](https://github.com/user-attachments/assets/a9202c3c-c699-4c2d-8568-d4ff84ca9296)
+
+This example shows the SQL query using mathematical query for correlation between Index and Inflation rate, allowing easier understanding of the data.
+---
+## 8.
+![retry](https://github.com/user-attachments/assets/b0a96e4d-838f-485b-bef6-0c234ec1c3d2)
+
+Error log:
+```
+INFO:root:prepare_retry: Input State: {'question': 'for food', 'history': ['show data', 'for food'], 'sql_query': "SELECT * FROM data WHERE Group = 'Food and Beverages' LIMIT 5;", 'result': {'error': '(sqlite3.OperationalError) near "Group": syntax error\n[SQL: SELECT * FROM data WHERE Group = \'Food and Beverages\' LIMIT 5;]\n(Background on this error at: https://sqlalche.me/e/20/e3q8)'}, 'retries': 0}
+INFO:root:prepare_retry: Output State: {'question': 'for food', 'history': ['show data', 'for food', 'Previous SQL error: (sqlite3.OperationalError) near "Group": syntax error\n[SQL: SELECT * FROM data WHERE Group = \'Food and Beverages\' LIMIT 5;]\n(Background on this error at: https://sqlalche.me/e/20/e3q8)'], 'sql_query': "SELECT * FROM data WHERE Group = 'Food and Beverages' LIMIT 5;", 'result': {'error': '(sqlite3.OperationalError) near "Group": syntax error\n[SQL: SELECT * FROM data WHERE Group = \'Food and Beverages\' LIMIT 5;]\n(Background on this error at: https://sqlalche.me/e/20/e3q8)'}, 'retries': 1}
+INFO:root:generate_query: Input State: {'question': 'for food', 'history': ['show data', 'for food', 'Previous SQL error: (sqlite3.OperationalError) near "Group": syntax error\n[SQL: SELECT * FROM data WHERE Group = \'Food and Beverages\' LIMIT 5;]\n(Background on this error at: https://sqlalche.me/e/20/e3q8)'], 'sql_query': "SELECT * FROM data WHERE Group = 'Food and Beverages' LIMIT 5;", 'result': {'error': '(sqlite3.OperationalError) near "Group": syntax error\n[SQL: SELECT * FROM data WHERE Group = \'Food and Beverages\' LIMIT 5;]\n(Background on this error at: https://sqlalche.me/e/20/e3q8)'}, 'retries': 1}
+INFO:httpx:HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:root:generate_query: Output State: {'sql_query': 'SELECT * FROM data WHERE "Group" = \'Food and Beverages\' LIMIT 5;', 'history': ['shiw data', 'for food', 'Previous SQL error: (sqlite3.OperationalError) near "Group": syntax error\n[SQL: SELECT * FROM data WHERE Group = \'Food and Beverages\' LIMIT 5;]\n(Background on this error at: https://sqlalche.me/e/20/e3q8)', 'for food'], 'question': 'for food', 'retries': 1}
+INFO:root:execute_query: Input State: {'question': 'for food', 'history': ['show data', 'for food', 'Previous SQL error: (sqlite3.OperationalError) near "Group": syntax error\n[SQL: SELECT * FROM data WHERE Group = \'Food and Beverages\' LIMIT 5;]\n(Background on this error at: https://sqlalche.me/e/20/e3q8)', 'for food'], 'sql_query': 'SELECT * FROM data WHERE "Group" = \'Food and Beverages\' LIMIT 5;', 'result': {'error': '(sqlite3.OperationalError) near "Group": syntax error\n[SQL: SELECT * FROM data WHERE Group = \'Food and Beverages\' LIMIT 5;]\n(Background on this error at: https://sqlalche.me/e/20/e3q8)'}, 'retries': 1}
+INFO:root:execute_query: Output State: {'result': {'columns': ['BaseYear', 'Year', 'Month', 'State', 'Sector', 'Group', 'SubGroup', 'Index', 'Inflation (%)'], 'data': [{'BaseYear': 2012, 'Year': 2024, 'Month': 'December', 'State': 'All India', 'Sector': 'Combined', 'Group': 'Food and Beverages', 'SubGroup': 'Cereals and Products', 'Index': 198.1, 'Inflation (%)': 6.51}, {'BaseYear': 2012, 'Year': 2024, 'Month': 'December', 'State': 'All India', 'Sector': 'Combined', 'Group': 'Food and Beverages', 'SubGroup': 'Meat and Fish', 'Index': 222.5, 'Inflation (%)': 5.3}, {'BaseYear': 2012, 'Year': 2024, 'Month': 'December', 'State': 'All India', 'Sector': 'Combined', 'Group': 'Food and Beverages', 'SubGroup': 'Egg', 'Index': 212.1, 'Inflation (%)': 6.85}, {'BaseYear': 2012, 'Year': 2024, 'Month': 'December', 'State': 'All India', 'Sector': 'Combined', 'Group': 'Food and Beverages', 'SubGroup': 'Milk and Products', 'Index': 187.5, 'Inflation (%)': 2.8}, {'BaseYear': 2012, 'Year': 2024, 'Month': 'December', 'State': 'All India', 'Sector': 'Combined', 'Group': 'Food and Beverages', 'SubGroup': 'Oils and Fats', 'Index': 183.7, 'Inflation (%)': 14.6}]}, 'history': ['show data', 'for food', 'Previous SQL error: (sqlite3.OperationalError) near "Group": syntax error\n[SQL: SELECT * FROM data WHERE Group = \'Food and Beverages\' LIMIT 5;]\n(Background on this error at: https://sqlalche.me/e/20/e3q8)', 'for food'], 'sql_query': 'SELECT * FROM data WHERE "Group" = \'Food and Beverages\' LIMIT 5;', 'question': 'for food', 'retries': 1}
+```
+This example shows the retry process included in the code. When an error is encountered during execution of a SQL Query, retry is triggered. The retry process includes passing the error along with the question again, it is repeated 3 times in case of en error. This will ensure less errors are occured during execution, hence giving accurate results.
