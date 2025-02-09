@@ -3,6 +3,7 @@
 ## 1. Context-Aware
 ![inflation-trends](https://github.com/user-attachments/assets/8a4bffeb-0c84-4ab8-b5e8-0c834d2a8227)
 ![context](https://github.com/user-attachments/assets/138e73e6-5f0b-4d5d-b5eb-a704d121af6a)
+![context](https://github.com/user-attachments/assets/bf52a27b-d47f-4d13-99b3-054d5a805023)
 
 The context is carried throughout the question.
 
