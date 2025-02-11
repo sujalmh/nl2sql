@@ -2,8 +2,8 @@
 
 ## 1. Context-Aware
 ![inflation-trends](https://github.com/user-attachments/assets/8a4bffeb-0c84-4ab8-b5e8-0c834d2a8227)
-![context](https://github.com/user-attachments/assets/138e73e6-5f0b-4d5d-b5eb-a704d121af6a)
 ![context](https://github.com/user-attachments/assets/bf52a27b-d47f-4d13-99b3-054d5a805023)
+![query_chain](https://github.com/user-attachments/assets/551275e7-b5db-435b-a16d-7db977761d9f)
 
 The context is carried throughout the question.
 
