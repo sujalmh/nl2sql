@@ -2,21 +2,16 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import os
 from werkzeug.utils import secure_filename
-from langchain_openai import ChatOpenAI
-from langchain.chains import create_sql_query_chain
+from langchain_openai import ChatOpenAI  # finetuned model
 from langchain_community.utilities import SQLDatabase
-from langchain_core.prompts import FewShotPromptTemplate, PromptTemplate
 from langgraph.graph import StateGraph, END
-from langchain_core.runnables import RunnablePassthrough
 import ast
 from typing import TypedDict, List, Optional, Dict
 from sqlalchemy import text
-from langchain_google_genai import ChatGoogleGenerativeAI
 from dotenv import load_dotenv
-import os
 import logging
 
-load_dotenv()
+load_dotenv(override=True)
 
 app = Flask(__name__)
 CORS(app)
@@ -26,186 +21,22 @@ HISTORY_WINDOW_SIZE = 10
 
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-# llm = ChatGoogleGenerativeAI(model="models/gemini-2.0-flash", google_api_key=os.getenv("GOOGLE_API_KEY"), temperature=0)
-llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
+# Initialize your finetuned model (using the OpenAI ChatCompletion API behind the scenes)
+llm = ChatOpenAI(model="ft:gpt-4o-mini-2024-07-18:personal::AzAgjE7R", temperature=0)
 
 db = None
 sample_data = None
+
+# We now store history as a list of messages (each message is a dict with "role" and "content")
 class QueryState(TypedDict):
     question: str
-    history: List[str]
+    history: List[Dict[str, str]]  # e.g., [{"role": "user", "content": "..."}, {"role": "assistant", "content": "..."}]
     sql_query: str
     result: Optional[dict]
     retries: int
 
-examples = [
-    {
-        "input": "show results from oct, nov, dec 2024",
-        "answer": """
-SELECT * FROM data WHERE Year = 2024 AND Month IN ('October', 'November', 'December') LIMIT 5;
-"""
-    },
-    {
-        "input": "inflation summary for year 2024 by months",
-        "answer": """
-SELECT Month, AVG(Inflation (%)) AS Total Inflation (%)
-FROM data
-WHERE Year = 2024
-GROUP BY Month
-ORDER BY
-    CASE
-        WHEN Month = 'January' THEN 1
-        WHEN Month = 'February' THEN 2
-        WHEN Month = 'March' THEN 3
-        WHEN Month = 'April' THEN 4
-        WHEN Month = 'May' THEN 5
-        WHEN Month = 'June' THEN 6
-        WHEN Month = 'July' THEN 7
-        WHEN Month = 'August' THEN 8
-        WHEN Month = 'September' THEN 9
-        WHEN Month = 'October' THEN 10
-        WHEN Month = 'November' THEN 11
-        WHEN Month = 'December' THEN 12
-    END
-"""
-    },
-    {
-        "input": "show data for andhra, tn, up in october 2024",
-        "answer": """
-SELECT * FROM data
-WHERE Year = 2024
-AND Month = 'October'
-AND State IN ('Andhra Pradesh', 'Tamil Nadu', 'Uttar Pradesh')
-LIMIT 5;
-"""
-    },
-     {
-        "input": "compare sector-wise inflation",
-        "answer": """
-SELECT
-    Year,
-    AVG(CASE WHEN Sector = 'Rural' THEN Inflation (%) END) AS Rural Inflation (%),
-    AVG(CASE WHEN Sector = 'Urban' THEN Inflation (%) END) AS Urban Inflation (%),
-    AVG(CASE WHEN Sector = 'Combined' THEN Inflation (%) END) AS Combined Inflation (%)
-FROM data
-WHERE Sector IN ('rural', 'urban')
-GROUP BY Year
-ORDER BY Year
-"""
-    },
-    {
-        "input": "compare food and fuel inflation in combined sector",
-        "answer": """
-SELECT
-    Year,
-    AVG(CASE WHEN Group = 'Food and Beverages' THEN Inflation (%) END) AS Food Inflation (%),
-    AVG(CASE WHEN Group = 'Fuel and Light' THEN Inflation (%) END) AS Fuel Inflation (%)
-FROM data
-WHERE Sector = 'combined' AND Group IN ('Food and Beverages', 'Fuel and Light')
-GROUP BY Year
-ORDER BY Year
-"""
-    },
-    {
-        "input": "show inflation rate trends in 2024",
-        "answer": """
-SELECT Month, AVG(Inflation (%)) AS Avg_Inflation
-FROM data
-WHERE Year = 2024
-GROUP BY Month
-ORDER BY
-    CASE
-        WHEN Month = 'January' THEN 1
-        WHEN Month = 'February' THEN 2
-        WHEN Month = 'March' THEN 3
-        WHEN Month = 'April' THEN 4
-        WHEN Month = 'May' THEN 5
-        WHEN Month = 'June' THEN 6
-        WHEN Month = 'July' THEN 7
-        WHEN Month = 'August' THEN 8
-        WHEN Month = 'September' THEN 9
-        WHEN Month = 'October' THEN 10
-        WHEN Month = 'November' THEN 11
-        WHEN Month = 'December' THEN 12
-    END
-"""
-    },{
-        "input": "what factors are affecting inflation rate of Karnataka in 2024",
-        "answer": """
-SELECT SubGroup, AVG(Inflation (%)) AS Avg_Inflation
-FROM data
-WHERE Year = 2024
-  AND State = 'Karnataka'
-GROUP BY SubGroup
-ORDER BY Avg_Inflation DESC
-LIMIT 5;
-"""
-    },
-    {
-        "input": "Which three subgroups had the most volatile inflation in the last three years?",
-        "answer": """SELECT SubGroup,
-       SQRT(AVG(Inflation (%) * Inflation (%)) - AVG(Inflation (%)) * AVG(Inflation (%))) AS Inflation_Volatility
-FROM data
-WHERE Year >= (SELECT MAX(Year) FROM data) - 2
-GROUP BY SubGroup
-ORDER BY Inflation_Volatility DESC
-LIMIT 3;
-"""
-    },
-    {
-    "input": "What is the correlation between index and inflation for each sector?",
-    "answer": """
-SELECT Sector,
-       (SUM(Index * Inflation (%)) - SUM(Index) * SUM(Inflation (%)) / COUNT(*)) /
-       (SQRT(SUM(Index * Index) - SUM(Index) * SUM(Index) / COUNT(*)) *
-        SQRT(SUM(Inflation (%) * Inflation (%)) - SUM(Inflation (%)) * SUM(Inflation (%)) / COUNT(*))
-       ) AS Correlation
-FROM data
-GROUP BY Sector
-ORDER BY Correlation DESC;
-"""
-    }, 
-    {
-        "input": "Show the year-over-year inflation change for each state from 2015 to 2020",
-        "answer": """
-WITH YearlyAvg AS (
-  SELECT State, Year, AVG([Inflation (%)]) AS AvgInflation
-  FROM data
-  WHERE Year BETWEEN 2014 AND 2020
-  GROUP BY State, Year
-),
-YearlyDiff AS (
-  SELECT State, Year, AvgInflation - LAG(AvgInflation) OVER (PARTITION BY State ORDER BY Year) AS YoY_Change
-  FROM YearlyAvg
-)
-SELECT
-  State,
-  MAX(CASE WHEN Year = 2015 THEN YoY_Change END) AS [2015],
-  MAX(CASE WHEN Year = 2016 THEN YoY_Change END) AS [2016],
-  MAX(CASE WHEN Year = 2017 THEN YoY_Change END) AS [2017],
-  MAX(CASE WHEN Year = 2018 THEN YoY_Change END) AS [2018],
-  MAX(CASE WHEN Year = 2019 THEN YoY_Change END) AS [2019],
-  MAX(CASE WHEN Year = 2020 THEN YoY_Change END) AS [2020]
-FROM YearlyDiff
-WHERE Year BETWEEN 2015 AND 2020
-GROUP BY State;
-"""
-    }
-]
-
-example_prompt = PromptTemplate(
-    input_variables=["input", "answer"],
-    template="Question: {input}\nSQLQuery: {answer}"
-)
-
-PROMPT = FewShotPromptTemplate(
-    examples=examples,
-    example_prompt=example_prompt,
-    prefix="""
-You are an extremely precise SQL expert analyzing economic data in a conversation. Your goal is to generate only valid, executable SQL queries. You MUST follow these instructions exactly. Pay very close attention to the conversation history and to error messages to refine your queries.
-Use this conversation history to understand context:
-
-{history}
+# The first system prompt: instructs the model how to generate SQL queries.
+SYSTEM_PROMPT = """You are an extremely precise SQL expert analyzing economic data in a conversation. Your goal is to generate only valid, executable SQL queries. You MUST follow these instructions exactly. Pay very close attention to the conversation history and to error messages to refine your queries.
 
 When the question is vague or requires summarization:
 - Identify and select only the columns relevant to the question.
@@ -235,22 +66,15 @@ Available tables:
 Here are some sample rows from the database to understand the structure:
 {sample_data}
 
-Examples:
-""",
-    suffix="""
-Current question: {input}
-SQLQuery:""",
-    input_variables=["history", "input", "table_info", "top_k", "sample_data"]
-)
+"""
+
 
 def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 
 @app.route('/api/upload', methods=['POST'])
 def upload_file():
-    global db
-    global sample_data
+    global db, sample_data
     if 'file' not in request.files:
         return jsonify({'error': 'No file part'}), 400
 
@@ -266,6 +90,7 @@ def upload_file():
         db = SQLDatabase.from_uri(f"sqlite:///{filepath}")
         query = "SELECT * FROM data LIMIT 5;"
         sample_data = db.run(query, fetch="cursor")
+        
         return jsonify({'message': 'File uploaded successfully'}), 200
 
     return jsonify({'error': 'Invalid file type'}), 400
@@ -278,16 +103,17 @@ def ask_question():
 
     data = request.json
     question = data.get('question')
+    # Expecting history as a list of message dicts, e.g.,
+    # [{"role": "user", "content": "first question"}, {"role": "assistant", "content": "first answer"}]
     history = data.get('history', [])
 
     if not question:
         return jsonify({'error': 'No question provided'}), 400
 
-    state = {
+    state: QueryState = {
         "question": question,
         "history": history,
         "sql_query": "",
-        "sample_data": sample_data,
         "result": None,
         "retries": 0
     }
@@ -302,28 +128,50 @@ def ask_question():
         })
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
 def create_graph():
-    def generate_query(state):
+    def generate_query(state: QueryState) -> QueryState:
         logging.info(f"generate_query: Input State: {state}")
-        chain = create_history_aware_sql_chain()
-        response = chain.invoke({
-            "question": state["question"],
-            "history": state.get("history", []),
-            "table_info": db.get_table_info(),
-            "sample_data": sample_data,
-            "top_k": 5
+        
+        messages = []
+        # Start with the system prompt
+        messages.append({"role": "system", "content": SYSTEM_PROMPT.format(table_info=db.get_table_info(), sample_data=sample_data, top_k=5)
+})
+        # Add table information and sample data as context
+        table_info = db.get_table_info()
+        sample_data_str = str(sample_data)
+        messages.append({
+            "role": "system",
+            "content": f"Table Information:\n{table_info}\nSample Data:\n{sample_data_str}"
         })
+        # Append any previous conversation history
+        if state.get("history"):
+            messages.extend(state["history"])
+        # Append the current question
+        messages.append({"role": "user", "content": state["question"]})
+        
+        # Invoke the finetuned model using the standard ChatCompletion API call
+        response = llm.invoke(messages)
+        # Assume the response is an object with a 'content' attribute;
+        # otherwise, adjust as necessary.
+        sql_query = response.content.strip() if hasattr(response, "content") else response.strip()
+        
+        # Update history with the current turn
+        new_history = state.get("history", []) + [
+            {"role": "user", "content": state["question"]},
+            {"role": "assistant", "content": sql_query}
+        ]
+        
         output_state = {
-            "sql_query": response.strip(),
-            "history": state["history"] + [state["question"]],
+            "sql_query": sql_query,
+            "history": new_history,
             "question": state["question"],
-            "retries": state.get("retries", 0)
+            "retries": state.get("retries", 0),
+            "result": None
         }
         logging.info(f"generate_query: Output State: {output_state}")
         return output_state
 
-    def execute_query(state):
+    def execute_query(state: QueryState) -> QueryState:
         logging.info(f"execute_query: Input State: {state}")
         try:
             query = state["sql_query"]
@@ -357,12 +205,13 @@ def create_graph():
             logging.info(f"execute_query: Error Output State: {output_state}")
             return output_state
 
-    def prepare_retry(state):
+    def prepare_retry(state: QueryState) -> QueryState:
         logging.info(f"prepare_retry: Input State: {state}")
         new_retries = state["retries"] + 1
         error_message = state["result"].get("error", "Unknown error")
+        # Add the error message to the history as a system message for context.
         new_history = state["history"] + [
-            f"Previous SQL error: {error_message}"
+            {"role": "system", "content": f"Previous SQL error: {error_message}"}
         ]
         output_state = {
             **state,
@@ -372,7 +221,7 @@ def create_graph():
         logging.info(f"prepare_retry: Output State: {output_state}")
         return output_state
 
-    def should_retry(state):
+    def should_retry(state: QueryState) -> bool:
         logging.info(f"should_retry: Input State: {state}")
         has_error = "error" in state.get("result", {})
         retries = state.get("retries", 0)
@@ -397,23 +246,6 @@ def create_graph():
     graph.add_edge("prepare_retry", "generate_query")
     return graph.compile()
 
-def create_history_aware_sql_chain():
-    base_chain = create_sql_query_chain(
-        llm=llm,
-        db=db,
-        prompt=PROMPT,
-        k=5
-    )
-
-    return RunnablePassthrough.assign(
-        history=lambda x: "\n".join(
-            x.get("history", [])
-        ),
-        input=lambda x: x["question"],
-        table_info=lambda x: db.get_table_info(),
-        top_k=lambda x: 5
-    ) | base_chain
-
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO) # Enable logging
+    logging.basicConfig(level=logging.INFO)  # Enable logging
     app.run(debug=True)
