@@ -27,15 +27,13 @@ llm = ChatOpenAI(model="ft:gpt-4o-mini-2024-07-18:personal::AzAgjE7R", temperatu
 db = None
 sample_data = None
 
-# We now store history as a list of messages (each message is a dict with "role" and "content")
 class QueryState(TypedDict):
     question: str
-    history: List[Dict[str, str]]  # e.g., [{"role": "user", "content": "..."}, {"role": "assistant", "content": "..."}]
+    history: List[Dict[str, str]] #[{"role": "user", "content": "..."}, {"role": "assistant", "content": "..."}]
     sql_query: str
     result: Optional[dict]
     retries: int
 
-# The first system prompt: instructs the model how to generate SQL queries.
 SYSTEM_PROMPT = """You are an extremely precise SQL expert analyzing economic data in a conversation. Your goal is to generate only valid, executable SQL queries. You MUST follow these instructions exactly. Pay very close attention to the conversation history and to error messages to refine your queries.
 
 When the question is vague or requires summarization:
@@ -103,8 +101,6 @@ def ask_question():
 
     data = request.json
     question = data.get('question')
-    # Expecting history as a list of message dicts, e.g.,
-    # [{"role": "user", "content": "first question"}, {"role": "assistant", "content": "first answer"}]
     history = data.get('history', [])
 
     if not question:
@@ -133,29 +129,24 @@ def create_graph():
         logging.info(f"generate_query: Input State: {state}")
         
         messages = []
-        # Start with the system prompt
         messages.append({"role": "system", "content": SYSTEM_PROMPT.format(table_info=db.get_table_info(), sample_data=sample_data, top_k=5)
 })
-        # Add table information and sample data as context
+
         table_info = db.get_table_info()
         sample_data_str = str(sample_data)
         messages.append({
             "role": "system",
             "content": f"Table Information:\n{table_info}\nSample Data:\n{sample_data_str}"
         })
-        # Append any previous conversation history
+
         if state.get("history"):
             messages.extend(state["history"])
-        # Append the current question
+
         messages.append({"role": "user", "content": state["question"]})
         
-        # Invoke the finetuned model using the standard ChatCompletion API call
         response = llm.invoke(messages)
-        # Assume the response is an object with a 'content' attribute;
-        # otherwise, adjust as necessary.
         sql_query = response.content.strip() if hasattr(response, "content") else response.strip()
         
-        # Update history with the current turn
         new_history = state.get("history", []) + [
             {"role": "user", "content": state["question"]},
             {"role": "assistant", "content": sql_query}
@@ -209,7 +200,6 @@ def create_graph():
         logging.info(f"prepare_retry: Input State: {state}")
         new_retries = state["retries"] + 1
         error_message = state["result"].get("error", "Unknown error")
-        # Add the error message to the history as a system message for context.
         new_history = state["history"] + [
             {"role": "system", "content": f"Previous SQL error: {error_message}"}
         ]
