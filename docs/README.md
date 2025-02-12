@@ -7,8 +7,11 @@
 To compare the results, I have created a pivot table in the excel worksheet. 
 ![image](https://github.com/user-attachments/assets/d76126be-3c11-4c4c-8eee-a84bedf6a8f5)
 Here are the results from the excel worksheet corresponding to the output from generated SQL query:  
+![image](https://github.com/user-attachments/assets/c9f3a8ef-d92c-4502-bba8-934b6454dde0)
 ![image](https://github.com/user-attachments/assets/9711122d-fe97-4b59-916c-e2aa634b797b)
+![image](https://github.com/user-attachments/assets/c823bdf8-c325-4a94-ad1b-823a97cf28db)
 ![image](https://github.com/user-attachments/assets/00ec3692-051b-4175-a529-0239d076d762)
+![image](https://github.com/user-attachments/assets/720cc30e-8a41-46cd-8c22-199845598b33)
 ![image](https://github.com/user-attachments/assets/3ebba2f4-5eb2-4acd-a038-f04e4f460a60)
 All the values from the original excel worksheet match with the output form generated SQL query
 
