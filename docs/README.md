@@ -38,6 +38,9 @@ In the example, user asks show inflation rate trends in 2024. The generated SQL 
 ---
 ## 4. Identifying Key Factors
 ![what-factors-are-affecting-inflation-rate-of-maharashtra-in-2024](https://github.com/user-attachments/assets/b3cfeb75-347e-4a58-aeec-b5323254e840)
+To verify the results, I created a pivot table in the excel worksheet. <br>
+![image](https://github.com/user-attachments/assets/bdbb96ce-ce53-44db-9698-f254545d8ee5)
+All the values from the original excel worksheet match with the output form generated SQL query.
 
 The user asks what factors are affecting the inflation rate. The generated SQL query returns results with average inflation for each subgroup showing which subgroup is affecting the inflation rate most. This highlights that the AI understands the intent and retrieves subgroup-level insights to explain inflation trends.
 
