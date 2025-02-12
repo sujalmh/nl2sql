@@ -4,7 +4,7 @@
 ![inflation-trends](https://github.com/user-attachments/assets/8a4bffeb-0c84-4ab8-b5e8-0c834d2a8227)
 ![context](https://github.com/user-attachments/assets/bf52a27b-d47f-4d13-99b3-054d5a805023)
 ![query_chain](https://github.com/user-attachments/assets/551275e7-b5db-435b-a16d-7db977761d9f)
-To compare the results, I have created a pivot table in the excel worksheet. <br>
+To compare the results, I created a pivot table in the excel worksheet. <br>
 ![image](https://github.com/user-attachments/assets/d76126be-3c11-4c4c-8eee-a84bedf6a8f5) <br>
 Here are the results from the excel worksheet corresponding to the output from generated SQL query:  
 ![Doc1_page-0001](https://github.com/user-attachments/assets/5a512059-04b4-4be3-862e-a2b81cbdd117)
@@ -29,6 +29,9 @@ When a user asks question without using the full entity name, the AI understands
 ---
 ## 3. Understanding Trends
 ![show-inflation-rate-trends-in-2024](https://github.com/user-attachments/assets/948ddd80-b403-45e5-ab08-19f3daa3e2d6)
+To verify the results, I created a pivot table in the excel worksheet. <br>
+![image](https://github.com/user-attachments/assets/7185169d-4303-46e5-936e-17cc83e6ee9b)
+All the values from the original excel worksheet match with the output form generated SQL query.
 
 In the example, user asks show inflation rate trends in 2024. The generated SQL query returns results with average inflation rate for every month, sorted calender-wise, for better comparison. This highlights that the AI understands the intent behind "trends" and structures the SQL query accordingly.
 
