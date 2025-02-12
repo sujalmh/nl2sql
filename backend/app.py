@@ -174,7 +174,7 @@ def create_graph():
             if query_result:
                 result["columns"] = list(query_result[0].keys())
                 result["data"] = [dict(row) for row in query_result]
-
+            
             output_state = {
                 "result": result,
                 "history": state["history"],
@@ -199,7 +199,15 @@ def create_graph():
     def prepare_retry(state: QueryState) -> QueryState:
         logging.info(f"prepare_retry: Input State: {state}")
         new_retries = state["retries"] + 1
-        error_message = state["result"].get("error", "Unknown error")
+        result = state.get("result", {})
+
+        if "error" in result:
+            error_message = result.get("error", "Unknown error")
+        elif result.get("columns") == [] and result.get("data") == []:
+            error_message = "Empty result set"
+        else:
+            error_message = "Unknown issue"
+            
         new_history = state["history"] + [
             {"role": "system", "content": f"Previous SQL error: {error_message}"}
         ]
@@ -213,9 +221,14 @@ def create_graph():
 
     def should_retry(state: QueryState) -> bool:
         logging.info(f"should_retry: Input State: {state}")
-        has_error = "error" in state.get("result", {})
+        result = state.get("result", {})
+
+        has_error = "error" in result
+        is_empty = (result.get("columns") == [] and result.get("data") == [])
+
         retries = state.get("retries", 0)
-        should_retry_val = has_error and retries < 3
+        should_retry_val = (has_error or is_empty) and retries < 3
+
         logging.info(f"should_retry: has_error={has_error}, retries={retries}, should_retry_val={should_retry_val}")
         return should_retry_val
 

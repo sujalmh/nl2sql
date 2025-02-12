@@ -1,54 +1,31 @@
 import pandas as pd
 import sqlite3
 
+# Read the CSV file, replacing '*' with None
+df = pd.read_csv("dataset\cpi Group data.csv", sep="\t", na_values=["*"])
 
-df = pd.read_csv('dataset/cpi Group data.csv')
-
-
-
-df.replace('*', pd.NA, inplace=True)
-
-
-df = df.convert_dtypes()
-
-
-
-
-
-table_name = 'data'
-
-
-
-custom_dtypes = {
-    'BaseYear': 'int',       
-    'Year': 'int',     
-    'Month': 'string',
-    'State': 'string', 
-    'Sector': 'string',
-    'Group': 'string',
-    'SubGroup': 'string',
-    'Index': 'float',
-    'Inflation (%)': 'float'
-}
-sql_dtypes = {
-    'int': 'INTEGER',
-    'float': 'REAL',
-    'string': 'TEXT',
-    'datetime64': 'DATETIME'
-}
-
-
-df = df.astype(custom_dtypes)
-conn = sqlite3.connect('database/dataset.db')
+# Create an SQLite database
+conn = sqlite3.connect("inflation_data.db")
 cursor = conn.cursor()
 
-columns = ', '.join([f'"{col}" {sql_dtypes[custom_dtypes[col]]}' for col in df.columns])
-create_table_sql = f'CREATE TABLE IF NOT EXISTS {table_name} ({columns})'
-cursor.execute(create_table_sql)
+# Create table
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS data (
+    BaseYear INTEGER,
+    Year INTEGER,
+    Month TEXT,
+    State TEXT,
+    Sector TEXT,
+    "Group" TEXT,
+    SubGroup TEXT,
+    "Index" REAL,
+    "Inflation (%)" REAL
+)
+''')
 
+# Insert data into the table
+df.to_sql("data", conn, if_exists="replace", index=False)
 
-df.to_sql(table_name, conn, if_exists='replace', index=False)
-
-
+# Commit and close connection
 conn.commit()
 conn.close()
