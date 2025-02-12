@@ -47,12 +47,16 @@ The user asks what factors are affecting the inflation rate. The generated SQL q
 ---
 ## 5. Year-over-Year Inflation
 ![year-over-year-difference](https://github.com/user-attachments/assets/4d547650-4e32-4336-a82d-294e668ab6e3)
+![image](https://github.com/user-attachments/assets/22d17ba9-8490-4a51-84bf-c729a8538dbd)
 
 The user asks for year-over-year difference in inflation rate for every state. The generated SQL is complex which takes average for each year and then subtracts with the year preceeding it. The SQL results are also formatted in a user-friendly way to help compare easily.
 
 ---
 ## 6. Identifying Inflation Volatility (Statistical Analysis)
 ![volatility](https://github.com/user-attachments/assets/86686eae-a7ad-4e5a-9667-05046a51eafd)
+To verify the results, I created a pivot table in the excel worksheet. <br>
+![image](https://github.com/user-attachments/assets/c39a78df-97c1-48a2-9fb8-b6063a409a3f)
+Values over the years 2021-2014 is considered, then the standard deviation of the inflation rate % is taken over those years.
 
 The user asks for most volatile inflation. The generated SQL uses standard deviation to compare the inflation rates between subgroups. This uses mathematical queries to get meaningful results.
 
