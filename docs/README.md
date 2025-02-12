@@ -4,36 +4,59 @@
 ![inflation-trends](https://github.com/user-attachments/assets/8a4bffeb-0c84-4ab8-b5e8-0c834d2a8227)
 ![context](https://github.com/user-attachments/assets/bf52a27b-d47f-4d13-99b3-054d5a805023)
 ![query_chain](https://github.com/user-attachments/assets/551275e7-b5db-435b-a16d-7db977761d9f)
+To compare the results, I created a pivot table in the excel worksheet. <br>
+![image](https://github.com/user-attachments/assets/d76126be-3c11-4c4c-8eee-a84bedf6a8f5) <br>
+Here are the results from the excel worksheet corresponding to the output from generated SQL query:  
+![Doc1_page-0001](https://github.com/user-attachments/assets/5a512059-04b4-4be3-862e-a2b81cbdd117)
+![Doc1_page-0002](https://github.com/user-attachments/assets/5e48496e-62e0-4477-b6f0-e0d6492ae0da)
+
+All the values from the original excel worksheet match with the output form generated SQL query
 
 The context is carried throughout the question.
 
 ---
 ## 2. Handling Partial Entity Names in Queries
-![compare-food-and-fuel-inflation-in-combined-sector](https://github.com/user-attachments/assets/a169d218-6267-447a-8fd0-9690396db3e0)
+![compare-food-and-fuel-inflation-in-combined-sector](https://github.com/user-attachments/assets/a169d218-6267-447a-8fd0-9690396db3e0) <br>
+To compare the results, I used the formula `=AVERAGEIFS(I:I, B:B, K2, E:E, "Rural", F:F, "Food and Beverages")` and `=AVERAGEIFS(I:I, B:B, B2, E:E, "Rural", F:F, "Fuel and Light")` in the original excel worksheet. 
+`Column B = Year
+Column E = Sector
+Column F = Group
+Column I = Inflation (%)` <br>
+![image](https://github.com/user-attachments/assets/c1efdf2a-6cdc-4dad-828d-9e74065ddb0e)
 
 When a user asks question without using the full entity name, the AI understands it and uses the full entity name to query. In the example, user asks compare food and fuel inflation in rural sector. The generated SQL uses groups `Food and Beverages` and `Fuel and Light` when not explicitly mentioned.
 
 ---
 ## 3. Understanding Trends
 ![show-inflation-rate-trends-in-2024](https://github.com/user-attachments/assets/948ddd80-b403-45e5-ab08-19f3daa3e2d6)
+To verify the results, I created a pivot table in the excel worksheet. <br>
+![image](https://github.com/user-attachments/assets/7185169d-4303-46e5-936e-17cc83e6ee9b)
+All the values from the original excel worksheet match with the output form generated SQL query.
 
 In the example, user asks show inflation rate trends in 2024. The generated SQL query returns results with average inflation rate for every month, sorted calender-wise, for better comparison. This highlights that the AI understands the intent behind "trends" and structures the SQL query accordingly.
 
 ---
 ## 4. Identifying Key Factors
 ![what-factors-are-affecting-inflation-rate-of-maharashtra-in-2024](https://github.com/user-attachments/assets/b3cfeb75-347e-4a58-aeec-b5323254e840)
+To verify the results, I created a pivot table in the excel worksheet. <br>
+![image](https://github.com/user-attachments/assets/bdbb96ce-ce53-44db-9698-f254545d8ee5)
+All the values from the original excel worksheet match with the output form generated SQL query.
 
 The user asks what factors are affecting the inflation rate. The generated SQL query returns results with average inflation for each subgroup showing which subgroup is affecting the inflation rate most. This highlights that the AI understands the intent and retrieves subgroup-level insights to explain inflation trends.
 
 ---
 ## 5. Year-over-Year Inflation
 ![year-over-year-difference](https://github.com/user-attachments/assets/4d547650-4e32-4336-a82d-294e668ab6e3)
+![image](https://github.com/user-attachments/assets/22d17ba9-8490-4a51-84bf-c729a8538dbd)
 
 The user asks for year-over-year difference in inflation rate for every state. The generated SQL is complex which takes average for each year and then subtracts with the year preceeding it. The SQL results are also formatted in a user-friendly way to help compare easily.
 
 ---
 ## 6. Identifying Inflation Volatility (Statistical Analysis)
 ![volatility](https://github.com/user-attachments/assets/86686eae-a7ad-4e5a-9667-05046a51eafd)
+To verify the results, I created a pivot table in the excel worksheet. <br>
+![image](https://github.com/user-attachments/assets/c39a78df-97c1-48a2-9fb8-b6063a409a3f)
+Values over the years 2021-2014 is considered, then the standard deviation of the inflation rate % is taken over those years.
 
 The user asks for most volatile inflation. The generated SQL uses standard deviation to compare the inflation rates between subgroups. This uses mathematical queries to get meaningful results.
 
