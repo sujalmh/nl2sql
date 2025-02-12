@@ -5,7 +5,7 @@
 ![context](https://github.com/user-attachments/assets/bf52a27b-d47f-4d13-99b3-054d5a805023)
 ![query_chain](https://github.com/user-attachments/assets/551275e7-b5db-435b-a16d-7db977761d9f)
 To compare the results, I have created a pivot table in the excel worksheet. <br>
-![image](https://github.com/user-attachments/assets/d76126be-3c11-4c4c-8eee-a84bedf6a8f5)
+![image](https://github.com/user-attachments/assets/d76126be-3c11-4c4c-8eee-a84bedf6a8f5) <br>
 Here are the results from the excel worksheet corresponding to the output from generated SQL query:  
 ![Doc1_page-0001](https://github.com/user-attachments/assets/5a512059-04b4-4be3-862e-a2b81cbdd117)
 ![Doc1_page-0002](https://github.com/user-attachments/assets/5e48496e-62e0-4477-b6f0-e0d6492ae0da)
@@ -16,13 +16,12 @@ The context is carried throughout the question.
 
 ---
 ## 2. Handling Partial Entity Names in Queries
-![compare-food-and-fuel-inflation-in-combined-sector](https://github.com/user-attachments/assets/a169d218-6267-447a-8fd0-9690396db3e0)
+![compare-food-and-fuel-inflation-in-combined-sector](https://github.com/user-attachments/assets/a169d218-6267-447a-8fd0-9690396db3e0) <br>
 To compare the results, I used the formula `=AVERAGEIFS(I:I, B:B, K2, E:E, "Rural", F:F, "Food and Beverages")` and `=AVERAGEIFS(I:I, B:B, B2, E:E, "Rural", F:F, "Fuel and Light")` in the original excel worksheet. 
 `Column B = Year
 Column E = Sector
 Column F = Group
-Column I = Inflation (%)`
-
+Column I = Inflation (%)` <br>
 ![image](https://github.com/user-attachments/assets/c1efdf2a-6cdc-4dad-828d-9e74065ddb0e)
 
 When a user asks question without using the full entity name, the AI understands it and uses the full entity name to query. In the example, user asks compare food and fuel inflation in rural sector. The generated SQL uses groups `Food and Beverages` and `Fuel and Light` when not explicitly mentioned.
