@@ -10,6 +10,7 @@ The context is carried throughout the question.
 ---
 ## 2. Handling Partial Entity Names in Queries
 ![compare-food-and-fuel-inflation-in-combined-sector](https://github.com/user-attachments/assets/a169d218-6267-447a-8fd0-9690396db3e0)
+![image](https://github.com/user-attachments/assets/c1efdf2a-6cdc-4dad-828d-9e74065ddb0e)
 
 When a user asks question without using the full entity name, the AI understands it and uses the full entity name to query. In the example, user asks compare food and fuel inflation in rural sector. The generated SQL uses groups `Food and Beverages` and `Fuel and Light` when not explicitly mentioned.
 
