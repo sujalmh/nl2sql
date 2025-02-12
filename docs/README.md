@@ -4,15 +4,12 @@
 ![inflation-trends](https://github.com/user-attachments/assets/8a4bffeb-0c84-4ab8-b5e8-0c834d2a8227)
 ![context](https://github.com/user-attachments/assets/bf52a27b-d47f-4d13-99b3-054d5a805023)
 ![query_chain](https://github.com/user-attachments/assets/551275e7-b5db-435b-a16d-7db977761d9f)
-To compare the results, I have created a pivot table in the excel worksheet. 
+To compare the results, I have created a pivot table in the excel worksheet. <br>
 ![image](https://github.com/user-attachments/assets/d76126be-3c11-4c4c-8eee-a84bedf6a8f5)
 Here are the results from the excel worksheet corresponding to the output from generated SQL query:  
-![image](https://github.com/user-attachments/assets/c9f3a8ef-d92c-4502-bba8-934b6454dde0)
-![image](https://github.com/user-attachments/assets/9711122d-fe97-4b59-916c-e2aa634b797b)
-![image](https://github.com/user-attachments/assets/c823bdf8-c325-4a94-ad1b-823a97cf28db)
-![image](https://github.com/user-attachments/assets/00ec3692-051b-4175-a529-0239d076d762)
-![image](https://github.com/user-attachments/assets/720cc30e-8a41-46cd-8c22-199845598b33)
-![image](https://github.com/user-attachments/assets/3ebba2f4-5eb2-4acd-a038-f04e4f460a60)
+![Doc1_page-0001](https://github.com/user-attachments/assets/5a512059-04b4-4be3-862e-a2b81cbdd117)
+![Doc1_page-0002](https://github.com/user-attachments/assets/5e48496e-62e0-4477-b6f0-e0d6492ae0da)
+
 All the values from the original excel worksheet match with the output form generated SQL query
 
 The context is carried throughout the question.
