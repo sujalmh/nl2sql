@@ -78,7 +78,7 @@ The LangGraph workflow consists of the following steps, as illustrated in the fl
 
 ## Results
 
-View results at (docs/README.md)[docs/README.md]
+View results at [docs/README.md](docs/README.md)
 
 ## Conclusion
 
