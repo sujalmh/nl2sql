@@ -10,8 +10,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "markdown-parser-react": "^2.0.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-markdown": "^9.0.3",
     "react-router-dom": "^7.1.5"
   },
   "devDependencies": {
