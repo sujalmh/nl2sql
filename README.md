@@ -158,6 +158,9 @@ The LangGraph workflow consists of the following nodes and transitions:
 
 *   **`next_node_decision(state: QueryState) -> str`**: LangGraph node function - Decides the next node in the workflow (described in Workflow Details).
 
+![localhost_5173_agent1](https://github.com/user-attachments/assets/d092006b-de64-4328-a6bf-aedb6af93186)
+
+
 ## Conclusion
 
 This documentation provides a detailed understanding of the NL2SQL agent application, its architecture, workflow, components, setup, and API usage. It should help developers and users understand how to deploy, use, and potentially extend this agentic system. The Mermaid flowchart and step-by-step workflow descriptions visually and textually explain the agent's decision-making process and the flow of information within the LangGraph.
