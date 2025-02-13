@@ -1,4 +1,127 @@
-# NL2SQL Agent Documentation
+# NL2SQL Agent Documentation (Simplified Version)
+
+This document provides an overview of a simplified NL2SQL agent application. This agent is designed to take natural language questions, convert them into SQL queries, execute them against a SQLite database, and return the results. This version focuses on query generation, execution, and basic retry logic without the complexity of query refinement or explanation.
+
+## System Architecture
+
+The NL2SQL agent is built using Flask, LangGraph, and OpenAI's language models.  The core workflow is defined by a LangGraph state graph, which manages the process of answering user questions.
+
+Here's a Mermaid flowchart visualizing the workflow:
+
+```mermaid
+graph LR
+    A[User Question] --> B(Generate Query);
+    B --> C(Execute Query);
+    C -- Should Retry? (Yes) --> D(Prepare Retry);
+    C -- Should Retry? (No) --> E[End];
+    D --> B;
+    classDef nodeFill fill:#f9f,stroke:#333,stroke-width:2px;
+    classDef endNode fill:#ccf,stroke:#333,stroke-width:2px;
+    class B,C,D nodeFill;
+    class E endNode;
+```
+
+### Components
+
+1.  **Flask Application:**
+    *   Serves as the web API using the Flask framework.
+    *   Handles file uploads (`.db` database files).
+    *   Provides an endpoint to ask questions (`/api/ask`).
+    *   Uses Flask-CORS to handle Cross-Origin Resource Sharing.
+
+2.  **LangGraph State Graph:**
+    *   Manages the state and flow of the NL2SQL process.
+    *   Defines nodes for generating SQL queries, executing queries, and preparing for retries.
+    *   Uses conditional edges to decide whether to retry query generation or end the process.
+
+3.  **Language Model (LLM):**
+    *   **`llm` (ChatOpenAI - finetuned model):** A finetuned OpenAI ChatCompletion model specialized in generating SQL queries from natural language. This model is responsible for understanding the user's question and translating it into a valid SQL query.
+
+4.  **SQLDatabase (Langchain):**
+    *   From Langchain, this utility is used to interact with the uploaded SQLite database.
+    *   It is initialized from the uploaded database file and allows the agent to:
+        *   Fetch table information (`get_table_info`).
+        *   Execute SQL queries (`run`).
+        *   Retrieve sample data (though not explicitly used in the retry mechanism, it's available for prompt context).
+
+5.  **QueryState (TypedDict):**
+    *   A `TypedDict` defining the structure of the state object that is passed between nodes in the LangGraph.
+    *   Contains information about:
+        *   `question`: The user's natural language question.
+        *   `history`: The conversation history as a list of dictionaries, each containing `role` (user/assistant) and `content`.
+        *   `sql_query`: The generated SQL query string.
+        *   `result`: The result of executing the SQL query (as a dictionary) or an error message.
+        *   `retries`: A counter for the number of retry attempts.
+
+## Workflow Details
+
+The LangGraph workflow consists of the following steps, as illustrated in the flowchart:
+
+1.  **`generate_query` Node:**
+    *   **Function:** `generate_query(state: QueryState) -> QueryState`
+    *   **Description:**
+        *   Takes the current `QueryState`.
+        *   Constructs a prompt for the LLM. This prompt includes:
+            *   A system prompt (`SYSTEM_PROMPT`) that instructs the LLM to act as a precise SQL expert and provides guidelines for SQL generation, especially for vague questions and follow-up questions. It also includes placeholders for table information and sample data.
+            *   Table information fetched using `db.get_table_info()`.
+            *   Sample data from the database (first 5 rows from the `data` table) to give the LLM context about the data structure.
+            *   Conversation history (if any) to maintain context across turns.
+            *   The user's current question.
+        *   Invokes the finetuned `llm` with this prompt to generate a SQL query.
+        *   Updates the `QueryState` by:
+            *   Storing the generated `sql_query`.
+            *   Appending the user's question and the generated SQL query to the `history`.
+            *   Resetting `result` to `None` for the next step.
+    *   **Output:** Updated `QueryState` with the generated SQL query.
+
+2.  **`execute_query` Node:**
+    *   **Function:** `execute_query(state: QueryState) -> QueryState`
+    *   **Description:**
+        *   Takes the `QueryState` (containing the generated `sql_query`).
+        *   Executes the `sql_query` against the SQLite database using `db.run()`.
+        *   Processes the raw result from the database cursor into a more usable dictionary format:
+            *   Extracts column names from the result.
+            *   Converts each row into a dictionary.
+        *   Handles potential SQL execution errors using a `try-except` block. If an error occurs, it captures the error message.
+        *   Updates the `QueryState` by:
+            *   Storing the query `result` (either the successful result set or an error dictionary).
+    *   **Output:** Updated `QueryState` containing the execution `result`.
+
+3.  **`should_retry` (Conditional Edge Decision):**
+    *   **Function:** `should_retry(state: QueryState) -> bool`
+    *   **Description:**
+        *   Evaluates the `result` in the `QueryState` to decide if a retry is necessary.
+        *   Checks for two conditions:
+            *   `has_error`: If the `result` dictionary contains an "error" key, indicating a SQL execution error.
+            *   `is_empty`: If the `result` indicates an empty result set (no columns and no data).
+        *   Also checks if the number of `retries` is less than a threshold (set to 3 in this code).
+        *   Returns `True` if either `has_error` or `is_empty` is true AND the retry limit has not been reached, indicating a retry is needed. Otherwise, returns `False`.
+    *   **Output:** `True` or `False` indicating whether to retry.
+
+4.  **`prepare_retry` Node:**
+    *   **Function:** `prepare_retry(state: QueryState) -> QueryState`
+    *   **Description:**
+        *   Executed only if `should_retry` returns `True`.
+        *   Prepares the state for a new attempt to generate a query.
+        *   Increments the `retries` counter in the `QueryState`.
+        *   Constructs an error message based on the `result` (either the specific SQL error or a generic "Empty result set" or "Unknown issue" message).
+        *   Adds a system message to the `history` containing the error message. This is important for providing context to the LLM in the next `generate_query` step, guiding it to produce a corrected query.
+        *   Does **not** modify the `sql_query` or `result` from the previous attempt; the focus is on updating the `history` and `retries` for the next query generation.
+    *   **Output:** Updated `QueryState` with increased `retries` and error context in `history`.
+
+5.  **End Node:**
+    *   **Function:** `END` (LangGraph built-in)
+    *   **Description:**
+        *   The workflow terminates here when `should_retry` returns `False`. This means either the query execution was successful (no error and not empty result) or the retry limit was reached.
+        *   The final `QueryState` at this point contains the `sql_query`, the `result` (successful or error), and the conversation `history`.
+
+## Conclusion
+
+This documentation outlines the architecture, components, and usage of a simplified NL2SQL agent. This version provides a robust foundation for converting natural language questions into SQL queries and executing them, incorporating basic retry logic for error handling. While simpler than the more complex version, it demonstrates the core principles of building an agentic NL2SQL system using Flask, LangGraph, and finetuned language models.
+
+---
+
+# NL2SQL Agent Documentation (Agentic AI Version)
 
 This document provides a comprehensive overview of the NL2SQL agent application, built using Flask, LangGraph, and OpenAI's language models. This agent is designed to convert natural language questions into SQL queries, execute them against a SQLite database, and provide results along with explanations of its reasoning.
 
