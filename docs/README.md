@@ -68,7 +68,7 @@ This example shows the SQL query using mathematical query for correlation betwee
 
 ---
 ## 8. Implementing SQL Query Retry Mechanism for Robust Execution
-![retry](https://github.com/user-attachments/assets/b0a96e4d-838f-485b-bef6-0c234ec1c3d2)
+![411352635-b0a96e4d-838f-485b-bef6-0c234ec1c3d2](https://github.com/user-attachments/assets/46f2d609-ca12-4fa1-97c9-7f116f3b3001)
 
 Error log:
 ```
