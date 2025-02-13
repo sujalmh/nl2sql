@@ -76,6 +76,10 @@ The LangGraph workflow consists of the following steps, as illustrated in the fl
     * Terminates the workflow when `should_retry` returns `False`.
     * The final `QueryState` contains the query, result, and history.
 
+## Results
+
+View results at (docs/README.md)[docs/README.md]
+
 ## Conclusion
 
 This documentation outlines the architecture, components, and usage of a simplified NL2SQL agent. This version provides a robust foundation for converting natural language questions into SQL queries and executing them, incorporating basic retry logic for error handling. While simpler than the more complex version, it demonstrates the core principles of building an agentic NL2SQL system using Flask, LangGraph, and finetuned language models.
