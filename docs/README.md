@@ -16,7 +16,7 @@ The context is carried throughout the question.
 
 ---
 ## 2. Handling Partial Entity Names in Queries
-![compare-food-and-fuel-inflation-in-combined-sector](https://github.com/user-attachments/assets/a169d218-6267-447a-8fd0-9690396db3e0) <br>
+![411351995-a169d218-6267-447a-8fd0-9690396db3e0](https://github.com/user-attachments/assets/8eeb346f-1a3e-4cb3-9032-e61724466980)
 To compare the results, I used the formula `=AVERAGEIFS(I:I, B:B, K2, E:E, "Rural", F:F, "Food and Beverages")` and `=AVERAGEIFS(I:I, B:B, B2, E:E, "Rural", F:F, "Fuel and Light")` in the original excel worksheet. 
 `Column B = Year
 Column E = Sector
@@ -28,7 +28,7 @@ When a user asks question without using the full entity name, the AI understands
 
 ---
 ## 3. Understanding Trends
-![show-inflation-rate-trends-in-2024](https://github.com/user-attachments/assets/948ddd80-b403-45e5-ab08-19f3daa3e2d6)
+![411352249-948ddd80-b403-45e5-ab08-19f3daa3e2d6](https://github.com/user-attachments/assets/1e652eff-705f-4e50-a266-4d3fc9ae8628)
 To verify the results, I created a pivot table in the excel worksheet. <br>
 ![image](https://github.com/user-attachments/assets/7185169d-4303-46e5-936e-17cc83e6ee9b)
 All the values from the original excel worksheet match with the output form generated SQL query.
