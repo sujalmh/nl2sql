@@ -46,7 +46,7 @@ The user asks what factors are affecting the inflation rate. The generated SQL q
 
 ---
 ## 5. Year-over-Year Inflation
-![year-over-year-difference](https://github.com/user-attachments/assets/4d547650-4e32-4336-a82d-294e668ab6e3)
+![411352407-4d547650-4e32-4336-a82d-294e668ab6e3](https://github.com/user-attachments/assets/afe3dcdf-dd4d-4250-a6a6-f4a99d624af4)
 ![image](https://github.com/user-attachments/assets/22d17ba9-8490-4a51-84bf-c729a8538dbd)
 
 The user asks for year-over-year difference in inflation rate for every state. The generated SQL is complex which takes average for each year and then subtracts with the year preceeding it. The SQL results are also formatted in a user-friendly way to help compare easily.
