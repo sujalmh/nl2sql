@@ -1,9 +1,9 @@
 # Results
 
 ## 1. Context-Aware
-![inflation-trends](https://github.com/user-attachments/assets/8a4bffeb-0c84-4ab8-b5e8-0c834d2a8227)
-![context](https://github.com/user-attachments/assets/bf52a27b-d47f-4d13-99b3-054d5a805023)
-![query_chain](https://github.com/user-attachments/assets/551275e7-b5db-435b-a16d-7db977761d9f)
+![411351908-8a4bffeb-0c84-4ab8-b5e8-0c834d2a8227](https://github.com/user-attachments/assets/a6931a18-9ad3-489c-9ab2-a4c9825359fc)
+![411365887-bf52a27b-d47f-4d13-99b3-054d5a805023](https://github.com/user-attachments/assets/313eec8b-2a9f-47db-a290-9ef918f575ac)
+![412120426-551275e7-b5db-435b-a16d-7db977761d9f](https://github.com/user-attachments/assets/1b116d90-636b-4d07-acf3-f1a11d21c707)
 To compare the results, I created a pivot table in the excel worksheet. <br>
 ![image](https://github.com/user-attachments/assets/d76126be-3c11-4c4c-8eee-a84bedf6a8f5) <br>
 Here are the results from the excel worksheet corresponding to the output from generated SQL query:  
@@ -16,7 +16,7 @@ The context is carried throughout the question.
 
 ---
 ## 2. Handling Partial Entity Names in Queries
-![compare-food-and-fuel-inflation-in-combined-sector](https://github.com/user-attachments/assets/a169d218-6267-447a-8fd0-9690396db3e0) <br>
+![411351995-a169d218-6267-447a-8fd0-9690396db3e0](https://github.com/user-attachments/assets/8eeb346f-1a3e-4cb3-9032-e61724466980)
 To compare the results, I used the formula `=AVERAGEIFS(I:I, B:B, K2, E:E, "Rural", F:F, "Food and Beverages")` and `=AVERAGEIFS(I:I, B:B, B2, E:E, "Rural", F:F, "Fuel and Light")` in the original excel worksheet. 
 `Column B = Year
 Column E = Sector
@@ -28,7 +28,7 @@ When a user asks question without using the full entity name, the AI understands
 
 ---
 ## 3. Understanding Trends
-![show-inflation-rate-trends-in-2024](https://github.com/user-attachments/assets/948ddd80-b403-45e5-ab08-19f3daa3e2d6)
+![411352249-948ddd80-b403-45e5-ab08-19f3daa3e2d6](https://github.com/user-attachments/assets/1e652eff-705f-4e50-a266-4d3fc9ae8628)
 To verify the results, I created a pivot table in the excel worksheet. <br>
 ![image](https://github.com/user-attachments/assets/7185169d-4303-46e5-936e-17cc83e6ee9b)
 All the values from the original excel worksheet match with the output form generated SQL query.
@@ -46,7 +46,7 @@ The user asks what factors are affecting the inflation rate. The generated SQL q
 
 ---
 ## 5. Year-over-Year Inflation
-![year-over-year-difference](https://github.com/user-attachments/assets/4d547650-4e32-4336-a82d-294e668ab6e3)
+![411352407-4d547650-4e32-4336-a82d-294e668ab6e3](https://github.com/user-attachments/assets/afe3dcdf-dd4d-4250-a6a6-f4a99d624af4)
 ![image](https://github.com/user-attachments/assets/22d17ba9-8490-4a51-84bf-c729a8538dbd)
 
 The user asks for year-over-year difference in inflation rate for every state. The generated SQL is complex which takes average for each year and then subtracts with the year preceeding it. The SQL results are also formatted in a user-friendly way to help compare easily.
@@ -68,7 +68,7 @@ This example shows the SQL query using mathematical query for correlation betwee
 
 ---
 ## 8. Implementing SQL Query Retry Mechanism for Robust Execution
-![retry](https://github.com/user-attachments/assets/b0a96e4d-838f-485b-bef6-0c234ec1c3d2)
+![411352635-b0a96e4d-838f-485b-bef6-0c234ec1c3d2](https://github.com/user-attachments/assets/46f2d609-ca12-4fa1-97c9-7f116f3b3001)
 
 Error log:
 ```
@@ -81,3 +81,6 @@ INFO:root:execute_query: Input State: {'question': 'for food', 'history': ['show
 INFO:root:execute_query: Output State: {'result': {'columns': ['BaseYear', 'Year', 'Month', 'State', 'Sector', 'Group', 'SubGroup', 'Index', 'Inflation (%)'], 'data': [{'BaseYear': 2012, 'Year': 2024, 'Month': 'December', 'State': 'All India', 'Sector': 'Combined', 'Group': 'Food and Beverages', 'SubGroup': 'Cereals and Products', 'Index': 198.1, 'Inflation (%)': 6.51}, {'BaseYear': 2012, 'Year': 2024, 'Month': 'December', 'State': 'All India', 'Sector': 'Combined', 'Group': 'Food and Beverages', 'SubGroup': 'Meat and Fish', 'Index': 222.5, 'Inflation (%)': 5.3}, {'BaseYear': 2012, 'Year': 2024, 'Month': 'December', 'State': 'All India', 'Sector': 'Combined', 'Group': 'Food and Beverages', 'SubGroup': 'Egg', 'Index': 212.1, 'Inflation (%)': 6.85}, {'BaseYear': 2012, 'Year': 2024, 'Month': 'December', 'State': 'All India', 'Sector': 'Combined', 'Group': 'Food and Beverages', 'SubGroup': 'Milk and Products', 'Index': 187.5, 'Inflation (%)': 2.8}, {'BaseYear': 2012, 'Year': 2024, 'Month': 'December', 'State': 'All India', 'Sector': 'Combined', 'Group': 'Food and Beverages', 'SubGroup': 'Oils and Fats', 'Index': 183.7, 'Inflation (%)': 14.6}]}, 'history': ['show data', 'for food', 'Previous SQL error: (sqlite3.OperationalError) near "Group": syntax error\n[SQL: SELECT * FROM data WHERE Group = \'Food and Beverages\' LIMIT 5;]\n(Background on this error at: https://sqlalche.me/e/20/e3q8)', 'for food'], 'sql_query': 'SELECT * FROM data WHERE "Group" = \'Food and Beverages\' LIMIT 5;', 'question': 'for food', 'retries': 1}
 ```
 This example shows the retry process included in the code. When an error is encountered during execution of a SQL Query, retry is triggered. The retry process includes passing the error along with the question again, it is repeated 3 times in case of en error. This will ensure less errors are occurred during execution, hence giving accurate results.
+
+---
+
