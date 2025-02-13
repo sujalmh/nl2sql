@@ -1,9 +1,9 @@
 # Results
 
 ## 1. Context-Aware
-![inflation-trends](https://github.com/user-attachments/assets/8a4bffeb-0c84-4ab8-b5e8-0c834d2a8227)
-![context](https://github.com/user-attachments/assets/bf52a27b-d47f-4d13-99b3-054d5a805023)
-![query_chain](https://github.com/user-attachments/assets/551275e7-b5db-435b-a16d-7db977761d9f)
+![411351908-8a4bffeb-0c84-4ab8-b5e8-0c834d2a8227](https://github.com/user-attachments/assets/a6931a18-9ad3-489c-9ab2-a4c9825359fc)
+![411365887-bf52a27b-d47f-4d13-99b3-054d5a805023](https://github.com/user-attachments/assets/313eec8b-2a9f-47db-a290-9ef918f575ac)
+![412120426-551275e7-b5db-435b-a16d-7db977761d9f](https://github.com/user-attachments/assets/1b116d90-636b-4d07-acf3-f1a11d21c707)
 To compare the results, I created a pivot table in the excel worksheet. <br>
 ![image](https://github.com/user-attachments/assets/d76126be-3c11-4c4c-8eee-a84bedf6a8f5) <br>
 Here are the results from the excel worksheet corresponding to the output from generated SQL query:  
